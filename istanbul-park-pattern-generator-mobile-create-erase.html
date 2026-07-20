@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Square Pattern Studio</title>
+  
+  <style>
+    :root {
+      color-scheme: dark;
+      --ui-bg: #050505;
+      --panel-bg: #101010;
+      --panel-raised: #171717;
+      --control-bg: #1b1b1b;
+      --control-hover: #222222;
+      --border: #292929;
+      --border-strong: #3a3a3a;
+      --text: #f4f4f2;
+      --muted: #9a9a96;
+      --subtle: #666662;
+      --accent: #ff0000;
+      --radius: 8px;
+      --panel-width: 292px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--ui-bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    body {
+      width: 100%;
+      height: 100vh;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: var(--panel-width) minmax(0, 1fr);
+      width: 100%;
+      height: 100vh;
+      min-height: 0;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .panel {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      width: var(--panel-width);
+      height: 100vh;
+      min-height: 0;
+      padding: 22px 18px 18px;
+      background: var(--panel-bg);
+      border-right: 1px solid var(--border);
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-strong) transparent;
+    }
+
+    .panel::-webkit-scrollbar { width: 8px; }
+    .panel::-webkit-scrollbar-thumb {
+      background: var(--border-strong);
+      border: 2px solid var(--panel-bg);
+      border-radius: 10px;
+    }
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+    .brand {
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      min-height: 138px;
+      padding: 20px;
+      margin-bottom: 4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand-logo {
+      display: block;
+      width: 150px;
+      height: auto;
+    }
+
+    .mobile-panel-toggle,
+    .mobile-draw-actions,
+    .mobile-draw-helper {
+      display: none;
+    }
+
+    .desktop-draw-helper {
+      display: block;
+    }
+
+    .group {
+      display: grid;
+      gap: 13px;
+      padding: 18px 2px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .group-title {
+      color: var(--subtle);
+      font-size: 10px;
+      font-weight: 650;
+      text-transform: uppercase;
+      letter-spacing: 0.13em;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field label,
+    .range-row,
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .field label,
+    .toggle-row label,
+    .range-row label {
+      color: #d8d8d5;
+      font-size: 12px;
+    }
+
+    .value {
+      color: var(--muted);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    select,
+    input[type="number"] {
+      width: 100%;
+      height: 38px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--control-bg);
+      color: var(--text);
+      padding: 0 11px;
+      outline: none;
+      transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+    }
+
+    select:hover,
+    input[type="number"]:hover {
+      background: var(--control-hover);
+      border-color: var(--border-strong);
+    }
+
+    select:focus,
+    input[type="number"]:focus {
+      border-color: color-mix(in srgb, var(--accent) 70%, white 10%);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
+    }
+
+    select {
+      appearance: none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+      background-position:
+        calc(100% - 15px) 16px,
+        calc(100% - 11px) 16px;
+      background-size: 4px 4px, 4px 4px;
+      background-repeat: no-repeat;
+      padding-right: 30px;
+    }
+
+    .inline {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 18px;
+      margin: 0;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 3px;
+      border-radius: 99px;
+      background: #343434;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      width: 15px;
+      height: 15px;
+      margin-top: -6px;
+      appearance: none;
+      border: 2px solid var(--panel-bg);
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 70%, white 10%);
+      transition: transform 120ms ease;
+    }
+
+    input[type="range"]:active::-webkit-slider-thumb {
+      transform: scale(1.12);
+    }
+
+    input[type="range"]::-moz-range-track {
+      height: 3px;
+      border-radius: 99px;
+      background: #343434;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 13px;
+      height: 13px;
+      border: 2px solid var(--panel-bg);
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .toggle-row {
+      min-height: 30px;
+    }
+
+    .toggle-row input[type="checkbox"] {
+      position: relative;
+      width: 34px;
+      height: 20px;
+      margin: 0;
+      appearance: none;
+      border: 1px solid var(--border-strong);
+      border-radius: 99px;
+      background: #252525;
+      cursor: pointer;
+      transition: background 150ms ease, border-color 150ms ease;
+    }
+
+    .toggle-row input[type="checkbox"]::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #b8b8b4;
+      transition: transform 150ms ease, background 150ms ease;
+    }
+
+    .toggle-row input[type="checkbox"]:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .toggle-row input[type="checkbox"]:checked::after {
+      transform: translateX(14px);
+      background: #fff;
+    }
+
+    .field.is-disabled,
+    .mode-panel[hidden] {
+      display: none;
+    }
+
+    .tabs,
+    .palette-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+      padding: 3px;
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) + 1px);
+      background: #090909;
+    }
+
+    .tab,
+    .palette-button {
+      min-height: 34px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+    }
+
+    .tab:hover,
+    .palette-button:hover {
+      color: var(--text);
+      background: #181818;
+    }
+
+    .tab.is-active,
+    .palette-button.is-active {
+      background: #f1f1ee;
+      color: #080808;
+      box-shadow: 0 1px 2px rgba(0,0,0,.35);
+    }
+
+    .helper {
+      margin: 0;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #141414;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 19px;
+      padding: 0 5px;
+      margin: 0 2px;
+      border: 1px solid #3a3a3a;
+      border-bottom-color: #4b4b4b;
+      border-radius: 4px;
+      background: #222;
+      color: #e7e7e3;
+      font-size: 10px;
+      line-height: 1;
+      box-shadow: 0 1px 0 #050505;
+    }
+
+    .actions {
+      position: sticky;
+      bottom: 0;
+      display: grid;
+      gap: 8px;
+      margin-top: auto;
+      padding: 16px 0 0;
+      background: linear-gradient(to bottom, transparent, var(--panel-bg) 18%);
+    }
+
+    .button {
+      width: 100%;
+      height: 41px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: var(--text);
+      color: #080808;
+      font-weight: 620;
+      cursor: pointer;
+      transition: transform 120ms ease, opacity 140ms ease, background 140ms ease, border-color 140ms ease;
+    }
+
+    .button:hover {
+      background: #fff;
+    }
+
+    .button:active {
+      transform: translateY(1px);
+    }
+
+    .button.secondary {
+      background: transparent;
+      color: var(--text);
+      border-color: var(--border);
+      font-weight: 500;
+    }
+
+    .button.secondary:hover {
+      background: var(--control-bg);
+      border-color: var(--border-strong);
+    }
+
+    .stage {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-width: 0;
+      min-height: 100vh;
+      padding: 48px;
+      overflow: auto;
+      background: #000;
+    }
+
+    .artboard-shell {
+      display: grid;
+      place-items: center;
+      max-width: calc(100vw - var(--panel-width) - 96px);
+      max-height: calc(100vh - 96px);
+    }
+
+    .artboard {
+      display: block;
+      max-width: 100%;
+      max-height: calc(100vh - 96px);
+      border: none;
+      box-shadow: none;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .artboard.is-drawing {
+      cursor: crosshair;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        width: 100%;
+        height: 100dvh;
+        min-height: 100dvh;
+        overflow: hidden;
+      }
+
+      .app {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 100dvh;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      .stage {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        padding: 24px;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+
+      .artboard-shell {
+        width: 100%;
+        height: 100%;
+        max-width: calc(100vw - 48px);
+        max-height: calc(100dvh - 96px);
+        display: grid;
+        place-items: center;
+      }
+
+      .artboard {
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
+      }
+
+      .panel {
+        position: fixed;
+        z-index: 20;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        width: auto;
+        height: min(72dvh, 640px);
+        max-height: calc(100dvh - 84px);
+        min-height: 0;
+        padding: 16px 18px calc(18px + env(safe-area-inset-bottom));
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: color-mix(in srgb, var(--panel-bg) 96%, transparent);
+        box-shadow: 0 18px 60px rgba(0,0,0,.55);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        overflow-x: hidden;
+        overflow-y: auto;
+        transform: translateY(calc(100% + 24px));
+        transition: transform 260ms cubic-bezier(.22,.8,.24,1);
+        overscroll-behavior: contain;
+      }
+
+      .app.panel-open .panel {
+        transform: translateY(0);
+      }
+
+      .brand {
+        min-height: 112px;
+        padding: 14px 20px 18px;
+      }
+
+      .brand-logo {
+        width: 132px;
+      }
+
+      .actions {
+        position: static;
+        background: none;
+      }
+
+      .mobile-draw-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3px;
+        padding: 3px;
+        border: 1px solid var(--border);
+        border-radius: calc(var(--radius) + 1px);
+        background: #090909;
+      }
+
+      .mobile-draw-action {
+        min-height: 38px;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+      }
+
+      .mobile-draw-action.is-active {
+        background: #f1f1ee;
+        color: #080808;
+        box-shadow: 0 1px 2px rgba(0,0,0,.35);
+      }
+
+      .desktop-draw-helper {
+        display: none;
+      }
+
+      .mobile-draw-helper {
+        display: block;
+      }
+
+      .mobile-panel-toggle {
+        position: fixed;
+        z-index: 30;
+        left: 50%;
+        bottom: calc(14px + env(safe-area-inset-bottom));
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-width: 132px;
+        height: 44px;
+        padding: 0 18px;
+        border: 1px solid var(--border-strong);
+        border-radius: 999px;
+        background: #f4f4f2;
+        color: #080808;
+        font-weight: 620;
+        box-shadow: 0 10px 30px rgba(0,0,0,.45);
+        transform: translateX(-50%);
+        cursor: pointer;
+        transition: bottom 260ms cubic-bezier(.22,.8,.24,1), background 140ms ease;
+      }
+
+      .mobile-panel-toggle:hover {
+        background: #fff;
+      }
+
+      .app.panel-open .mobile-panel-toggle {
+        bottom: calc(min(72dvh, 640px) + 20px + env(safe-area-inset-bottom));
+      }
+
+      .mobile-panel-toggle::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-right: 1.5px solid currentColor;
+        border-bottom: 1.5px solid currentColor;
+        transform: rotate(225deg) translate(-1px, -1px);
+        transition: transform 200ms ease;
+      }
+
+      .app.panel-open .mobile-panel-toggle::before {
+        transform: rotate(45deg) translate(-1px, -1px);
+      }
+
+      .app.panel-open .mobile-panel-toggle .toggle-label-open,
+      .mobile-panel-toggle .toggle-label-close {
+        display: none;
+      }
+
+      .app.panel-open .mobile-panel-toggle .toggle-label-close {
+        display: inline;
+      }
+    }
+  </style>
+
+</head>
+<body>
+  <main class="app">
+    <aside class="panel" id="controlPanel">
+
+<div class="brand">
+  <svg class="brand-logo" aria-label="Istanbul Park logo" role="img"
+       xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1207.17 840.04">
+    <polygon fill="#fff" points="554.02 70.52 397.26 72.02 176.91 301.53 111.51 301.84 111.51 403.05 229.85 403.05 554.02 70.52"/>
+    <polygon fill="#fff" points="884.32 69.1 612.84 70.75 111.51 601.07 111.51 713.17 229.2 712.56 229.32 645.78 662.33 185.55 832.76 186.17 963.49 333.37 962.97 363.44 850.07 494.52 442.5 493.91 340.16 607.46 727.32 608.89 900.12 609.3 1083.62 396.69 1083.62 293.33 884.32 69.1"/>
+  </svg>
+</div>
+
+<section class="group">
+        <div class="group-title">Colour palette</div>
+        <div class="palette-toggle" role="group" aria-label="Colour palette">
+          <button class="palette-button is-active" id="redPalette" type="button" aria-pressed="true">Red</button>
+          <button class="palette-button" id="turqouisePalette" type="button" aria-pressed="false">Turqouise</button>
+        </div>
+      </section>
+
+      <section class="group">
+        <div class="group-title">Artboard</div>
+        <div class="field">
+          <label for="preset">Size</label>
+          <select id="preset">
+            <option value="1080x1080">Square · 1080 × 1080</option>
+            <option value="1080x1350">Portrait · 1080 × 1350</option>
+            <option value="1080x1920">Story · 1080 × 1920</option>
+            <option value="1920x1080">Landscape · 1920 × 1080</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+        <div class="inline">
+          <div class="field"><label for="width">Width</label><input id="width" type="number" min="1" max="10000" value="1080" /></div>
+          <div class="field"><label for="height">Height</label><input id="height" type="number" min="1" max="10000" value="1080" /></div>
+        </div>
+        <div class="toggle-row">
+          <label for="backgroundEnabled">Background colour</label>
+          <input id="backgroundEnabled" type="checkbox" />
+        </div>
+      </section>
+
+      <section class="group">
+        <div class="group-title">Pattern mode</div>
+        <div class="tabs" role="tablist" aria-label="Pattern mode">
+          <button class="tab is-active" id="noiseTab" type="button" role="tab" aria-selected="true">Noise</button>
+          <button class="tab" id="drawTab" type="button" role="tab" aria-selected="false">Draw</button>
+        </div>
+
+        <div class="field">
+          <div class="range-row"><label for="squaresAcross">Squares across</label><span class="value" id="gridValue">—</span></div>
+          <input id="squaresAcross" type="range" min="2" max="120" value="12" />
+        </div>
+
+        <div class="mode-panel" id="noisePanel">
+          <div class="group">
+            <div class="field">
+              <div class="range-row"><label for="density">Square density</label><span class="value" id="densityValue">70%</span></div>
+              <input id="density" type="range" min="5" max="100" value="70" />
+            </div>
+            <div class="field"><label for="seed">Noise seed</label><input id="seed" type="number" min="0" max="999999" value="1" /></div>
+          </div>
+        </div>
+
+        <div class="mode-panel" id="drawPanel" hidden>
+          <div class="group">
+            <div class="mobile-draw-actions" role="group" aria-label="Drawing action">
+              <button class="mobile-draw-action is-active" id="mobileCreateMode" type="button" aria-pressed="true">Create</button>
+              <button class="mobile-draw-action" id="mobileEraseMode" type="button" aria-pressed="false">Erase</button>
+            </div>
+            <p class="helper desktop-draw-helper">Drag to draw. Hold <span class="key">⌥</span> Option while starting a stroke to erase. Every edit is mirrored horizontally and vertically.</p>
+            <p class="helper mobile-draw-helper">Choose Create or Erase, then drag across the artboard. Every edit is mirrored horizontally and vertically.</p>
+            <button class="button secondary" id="clearDrawing" type="button">Clear drawing</button>
+          </div>
+        </div>
+
+        <div class="toggle-row">
+          <label for="depthEnabled">Motion depth</label>
+          <input id="depthEnabled" type="checkbox" />
+        </div>
+        <div class="field is-disabled" id="falloffField">
+          <div class="range-row"><label for="depthFalloff">Depth falloff</label><span class="value" id="depthFalloffValue">45%</span></div>
+          <input id="depthFalloff" type="range" min="10" max="90" value="45" />
+        </div>
+      </section>
+
+      <div class="actions">
+        <button class="button" id="download" type="button">Download SVG</button>
+        <button class="button secondary" id="reset" type="button">Reset settings</button>
+      </div>
+    </aside>
+
+    <button class="mobile-panel-toggle" id="mobilePanelToggle" type="button"
+            aria-controls="controlPanel" aria-expanded="false">
+      <span class="toggle-label-open">Controls</span>
+      <span class="toggle-label-close">Close</span>
+    </button>
+
+    <section class="stage">
+      <div class="artboard-shell">
+        <svg id="preview" class="artboard" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Repeating square pattern preview"></svg>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const SVG_NS = "http://www.w3.org/2000/svg";
+    const $ = id => document.getElementById(id);
+
+    const redPaletteButton = $("redPalette");
+    const turqouisePaletteButton = $("turqouisePalette");
+    const preset = $("preset");
+    const widthInput = $("width");
+    const heightInput = $("height");
+    const backgroundEnabledInput = $("backgroundEnabled");
+    const squaresAcrossInput = $("squaresAcross");
+    const densityInput = $("density");
+    const seedInput = $("seed");
+    const depthEnabledInput = $("depthEnabled");
+    const depthFalloffInput = $("depthFalloff");
+    const falloffField = $("falloffField");
+    const gridValue = $("gridValue");
+    const densityValue = $("densityValue");
+    const depthFalloffValue = $("depthFalloffValue");
+    const preview = $("preview");
+    const noiseTab = $("noiseTab");
+    const drawTab = $("drawTab");
+    const noisePanel = $("noisePanel");
+    const drawPanel = $("drawPanel");
+    const clearDrawingButton = $("clearDrawing");
+    const mobileCreateModeButton = $("mobileCreateMode");
+    const mobileEraseModeButton = $("mobileEraseMode");
+    const downloadButton = $("download");
+    const resetButton = $("reset");
+
+    const palettes = {
+      red: { square: "#ff0000", background: "#660A0C" },
+      turqouise: { square: "#04d4e4", background: "#00b5bf" }
+    };
+
+    const defaults = {
+      palette: "red",
+      width: 1080,
+      height: 1080,
+      squaresAcross: 12,
+      density: 70,
+      seed: 1,
+      depthEnabled: false,
+      depthFalloff: 45,
+      backgroundEnabled: false,
+      mode: "noise"
+    };
+
+    let mode = defaults.mode;
+    let currentPalette = defaults.palette;
+    let isPointerDown = false;
+    let pointerAction = "add";
+    let mobileDrawAction = "add";
+    let drawnCells = new Set();
+    let lastDrawnCell = null;
+
+    function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+
+    function getSettings() {
+      const width = clamp(Number(widthInput.value) || defaults.width, 1, 10000);
+      const height = clamp(Number(heightInput.value) || defaults.height, 1, 10000);
+      const squaresAcross = Math.max(2, Number(squaresAcrossInput.value) || defaults.squaresAcross);
+      const squareSize = width / squaresAcross;
+      const rows = Math.max(1, Math.round(height / squareSize));
+      return {
+        width, height, squaresAcross, rows, squareSize,
+        density: clamp(Number(densityInput.value) || defaults.density, 5, 100),
+        seed: clamp(Number(seedInput.value) || 0, 0, 999999),
+        depthEnabled: depthEnabledInput.checked,
+        depthFalloff: clamp(Number(depthFalloffInput.value) || defaults.depthFalloff, 10, 90),
+        backgroundEnabled: backgroundEnabledInput.checked,
+        palette: palettes[currentPalette] ? currentPalette : defaults.palette
+      };
+    }
+
+    function refreshSquareCounts(preferredCount) {
+      const width = clamp(Number(widthInput.value) || defaults.width, 1, 10000);
+      const previous = Number(preferredCount || squaresAcrossInput.value || defaults.squaresAcross);
+      const maxAcross = Math.max(2, Math.min(120, Math.floor(width)));
+      squaresAcrossInput.max = maxAcross;
+      squaresAcrossInput.value = clamp(Math.round(previous), 2, maxAcross);
+    }
+
+    function createSVGElement(name, attrs = {}) {
+      const node = document.createElementNS(SVG_NS, name);
+      Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+      return node;
+    }
+
+    function mulberry32(seed) {
+      return function() {
+        let t = seed += 0x6D2B79F5;
+        t = Math.imul(t ^ t >>> 15, t | 1);
+        t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+
+    function buildMirroredNoise(cols, rows, density, seed) {
+      const halfCols = Math.ceil(cols / 2);
+      const halfRows = Math.ceil(rows / 2);
+      const random = mulberry32(seed || 1);
+      const base = Array.from({ length: halfRows }, () =>
+        Array.from({ length: halfCols }, () => random() < density / 100)
+      );
+      return Array.from({ length: rows }, (_, y) => {
+        const sourceY = y < halfRows ? y : rows - 1 - y;
+        return Array.from({ length: cols }, (_, x) => {
+          const sourceX = x < halfCols ? x : cols - 1 - x;
+          return base[sourceY][sourceX];
+        });
+      });
+    }
+
+    function buildDrawGrid(cols, rows) {
+      const grid = Array.from({ length: rows }, () => Array(cols).fill(false));
+      drawnCells.forEach(key => {
+        const [x, y] = key.split(":").map(Number);
+        if (x >= 0 && x < cols && y >= 0 && y < rows) grid[y][x] = true;
+      });
+      return grid;
+    }
+
+    function getPatternGrid(cols, rows, density, seed) {
+      return mode === "draw" ? buildDrawGrid(cols, rows) : buildMirroredNoise(cols, rows, density, seed);
+    }
+
+    function buildPatternSVG(target) {
+      const settings = getSettings();
+      const { width, height, squareSize, squaresAcross: cols, rows, density, seed, depthEnabled, depthFalloff, backgroundEnabled, palette } = settings;
+      const colours = palettes[palette];
+      const grid = getPatternGrid(cols, rows, density, seed);
+
+      target.replaceChildren();
+      target.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      target.setAttribute("width", width);
+      target.setAttribute("height", height);
+      target.setAttribute("shape-rendering", "crispEdges");
+
+      const defs = createSVGElement("defs");
+      const clipId = target === preview ? "previewClip" : "exportClip";
+      const clipPath = createSVGElement("clipPath", { id: clipId });
+      clipPath.appendChild(createSVGElement("rect", { x: 0, y: 0, width, height }));
+      defs.appendChild(clipPath);
+      target.appendChild(defs);
+
+      // Named SVG layers. The Inkscape layer metadata is also recognised by
+      // Illustrator and keeps Background, Squares and Dots independently editable.
+      target.setAttribute("xmlns:inkscape", "http://www.inkscape.org/namespaces/inkscape");
+
+      const backgroundLayer = createSVGElement("g", {
+        id: "background-layer",
+        "inkscape:groupmode": "layer",
+        "inkscape:label": "Background",
+        "clip-path": `url(#${clipId})`
+      });
+      const squaresLayer = createSVGElement("g", {
+        id: "squares-layer",
+        "inkscape:groupmode": "layer",
+        "inkscape:label": "Squares",
+        "clip-path": `url(#${clipId})`
+      });
+      const dotsLayer = createSVGElement("g", {
+        id: "dots-layer",
+        "inkscape:groupmode": "layer",
+        "inkscape:label": "Dots",
+        "clip-path": `url(#${clipId})`
+      });
+
+      if (backgroundEnabled) {
+        backgroundLayer.appendChild(createSVGElement("rect", { x: 0, y: 0, width, height, fill: colours.background }));
+      }
+
+      if (depthEnabled) {
+        const trailLength = 4;
+        const firstOpacity = 1 - depthFalloff / 100;
+        const trailCells = new Map();
+        for (let y = 0; y < rows; y++) {
+          for (let x = 0; x < cols; x++) {
+            if (!grid[y][x]) continue;
+            const direction = x < cols / 2 ? -1 : 1;
+            for (let step = 1; step <= trailLength; step++) {
+              const trailX = x + direction * step;
+              if (trailX < 0 || trailX >= cols) break;
+              const opacity = Math.pow(firstOpacity, step);
+              const key = `${trailX}:${y}`;
+              trailCells.set(key, Math.max(trailCells.get(key) || 0, opacity));
+            }
+          }
+        }
+        trailCells.forEach((opacity, key) => {
+          const [x, y] = key.split(":").map(Number);
+          squaresLayer.appendChild(createSVGElement("rect", {
+            x: x * squareSize, y: y * squareSize, width: squareSize, height: squareSize,
+            fill: colours.square, opacity: opacity.toFixed(3)
+          }));
+        });
+      }
+
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          if (!grid[y][x]) continue;
+          squaresLayer.appendChild(createSVGElement("rect", {
+            x: x * squareSize, y: y * squareSize, width: squareSize, height: squareSize, fill: colours.square
+          }));
+        }
+      }
+
+      // Fixed 1px markers at every grid intersection.
+      for (let y = 0; y <= rows; y++) {
+        for (let x = 0; x <= cols; x++) {
+          dotsLayer.appendChild(createSVGElement("rect", {
+            x: x * squareSize - 0.5, y: y * squareSize - 0.5,
+            width: 1, height: 1, fill: "#ffffff"
+          }));
+        }
+      }
+
+      target.appendChild(backgroundLayer);
+      target.appendChild(squaresLayer);
+      target.appendChild(dotsLayer);
+      gridValue.textContent = `${cols} × ${rows}`;
+      densityValue.textContent = `${density}%`;
+      depthFalloffValue.textContent = `${depthFalloff}%`;
+      falloffField.classList.toggle("is-disabled", !depthEnabled);
+    }
+
+    function render() {
+      const colours = palettes[currentPalette] || palettes.red;
+      document.documentElement.style.setProperty("--accent", colours.square);
+      buildPatternSVG(preview);
+    }
+
+    function setPalette(nextPalette) {
+      if (!palettes[nextPalette]) return;
+      currentPalette = nextPalette;
+      const isRed = currentPalette === "red";
+      redPaletteButton.classList.toggle("is-active", isRed);
+      turqouisePaletteButton.classList.toggle("is-active", !isRed);
+      redPaletteButton.setAttribute("aria-pressed", String(isRed));
+      turqouisePaletteButton.setAttribute("aria-pressed", String(!isRed));
+      render();
+    }
+
+    function setMode(nextMode) {
+      mode = nextMode;
+      const drawing = mode === "draw";
+      noiseTab.classList.toggle("is-active", !drawing);
+      drawTab.classList.toggle("is-active", drawing);
+      noiseTab.setAttribute("aria-selected", String(!drawing));
+      drawTab.setAttribute("aria-selected", String(drawing));
+      noisePanel.hidden = drawing;
+      drawPanel.hidden = !drawing;
+      preview.classList.toggle("is-drawing", drawing);
+      render();
+    }
+
+    function updateMirroredCell(x, y, action = "add") {
+      const { squaresAcross: cols, rows } = getSettings();
+      const mirrored = [
+        [x, y],
+        [cols - 1 - x, y],
+        [x, rows - 1 - y],
+        [cols - 1 - x, rows - 1 - y]
+      ];
+
+      let changed = false;
+
+      mirrored.forEach(([mx, my]) => {
+        const key = `${mx}:${my}`;
+
+        if (action === "remove") {
+          if (drawnCells.delete(key)) changed = true;
+        } else if (!drawnCells.has(key)) {
+          drawnCells.add(key);
+          changed = true;
+        }
+      });
+
+      return changed;
+    }
+
+    function drawFromPointer(event) {
+      if (mode !== "draw" || !isPointerDown) return;
+
+      const matrix = preview.getScreenCTM();
+      if (!matrix) return;
+
+      const point = preview.createSVGPoint();
+      point.x = event.clientX;
+      point.y = event.clientY;
+      const svgPoint = point.matrixTransform(matrix.inverse());
+
+      const { squareSize, squaresAcross: cols, rows } = getSettings();
+      const x = clamp(Math.floor(svgPoint.x / squareSize), 0, cols - 1);
+      const y = clamp(Math.floor(svgPoint.y / squareSize), 0, rows - 1);
+      const key = `${x}:${y}`;
+      if (key === lastDrawnCell) return;
+      lastDrawnCell = key;
+      if (updateMirroredCell(x, y, pointerAction)) render();
+    }
+
+    preview.addEventListener("pointerdown", event => {
+      if (mode !== "draw") return;
+      event.preventDefault();
+      isPointerDown = true;
+      pointerAction = window.matchMedia("(max-width: 760px)").matches
+        ? mobileDrawAction
+        : (event.altKey ? "remove" : "add");
+      lastDrawnCell = null;
+      preview.setPointerCapture(event.pointerId);
+      drawFromPointer(event);
+    });
+    preview.addEventListener("pointermove", drawFromPointer);
+    preview.addEventListener("pointerup", event => {
+      isPointerDown = false;
+      pointerAction = "add";
+      lastDrawnCell = null;
+      if (preview.hasPointerCapture(event.pointerId)) preview.releasePointerCapture(event.pointerId);
+    });
+    preview.addEventListener("pointercancel", () => { isPointerDown = false; pointerAction = "add"; lastDrawnCell = null; });
+
+    function syncPresetFromInputs() {
+      const key = `${Number(widthInput.value)}x${Number(heightInput.value)}`;
+      const option = [...preset.options].find(item => item.value === key);
+      preset.value = option ? key : "custom";
+    }
+
+    preset.addEventListener("change", () => {
+      if (preset.value === "custom") return;
+      const [width, height] = preset.value.split("x").map(Number);
+      widthInput.value = width;
+      heightInput.value = height;
+      refreshSquareCounts();
+      drawnCells.clear();
+      render();
+    });
+
+    [widthInput, heightInput].forEach(input => input.addEventListener("input", () => {
+      syncPresetFromInputs();
+      refreshSquareCounts();
+      drawnCells.clear();
+      render();
+    }));
+
+    squaresAcrossInput.addEventListener("input", () => { drawnCells.clear(); render(); });
+    [densityInput, depthFalloffInput, seedInput].forEach(input => input.addEventListener("input", render));
+    [backgroundEnabledInput, depthEnabledInput].forEach(input => input.addEventListener("change", render));
+    redPaletteButton.addEventListener("click", () => setPalette("red"));
+    turqouisePaletteButton.addEventListener("click", () => setPalette("turqouise"));
+    noiseTab.addEventListener("click", () => setMode("noise"));
+    drawTab.addEventListener("click", () => setMode("draw"));
+    function setMobileDrawAction(action) {
+      mobileDrawAction = action;
+      const creating = action === "add";
+      mobileCreateModeButton.classList.toggle("is-active", creating);
+      mobileEraseModeButton.classList.toggle("is-active", !creating);
+      mobileCreateModeButton.setAttribute("aria-pressed", String(creating));
+      mobileEraseModeButton.setAttribute("aria-pressed", String(!creating));
+    }
+
+    mobileCreateModeButton.addEventListener("click", () => setMobileDrawAction("add"));
+    mobileEraseModeButton.addEventListener("click", () => setMobileDrawAction("remove"));
+
+    clearDrawingButton.addEventListener("click", () => { drawnCells.clear(); render(); });
+
+    downloadButton.addEventListener("click", () => {
+      const exportSVG = createSVGElement("svg", {
+        xmlns: SVG_NS,
+        "xmlns:inkscape": "http://www.inkscape.org/namespaces/inkscape"
+      });
+      buildPatternSVG(exportSVG);
+      const source = `<?xml version="1.0" encoding="UTF-8"?>\n${new XMLSerializer().serializeToString(exportSVG)}`;
+      const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const { width, height } = getSettings();
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      const now = new Date();
+      const pad = n => String(n).padStart(2,"0");
+      const timestamp = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+      anchor.download = `${currentPalette}-square-pattern_${mode}_${width}x${height}_${timestamp}.svg`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      render();
+    });
+
+    resetButton.addEventListener("click", () => {
+      currentPalette = defaults.palette;
+      redPaletteButton.classList.add("is-active");
+      turqouisePaletteButton.classList.remove("is-active");
+      redPaletteButton.setAttribute("aria-pressed", "true");
+      turqouisePaletteButton.setAttribute("aria-pressed", "false");
+      preset.value = "1080x1080";
+      widthInput.value = defaults.width;
+      heightInput.value = defaults.height;
+      refreshSquareCounts(defaults.squaresAcross);
+      densityInput.value = defaults.density;
+      seedInput.value = defaults.seed;
+      depthEnabledInput.checked = defaults.depthEnabled;
+      depthFalloffInput.value = defaults.depthFalloff;
+      backgroundEnabledInput.checked = defaults.backgroundEnabled;
+      drawnCells.clear();
+      setMode(defaults.mode);
+    });
+
+    refreshSquareCounts(defaults.squaresAcross);
+    setMode(defaults.mode);
+  
+    const mobilePanelToggle = document.getElementById("mobilePanelToggle");
+    const appRoot = document.querySelector(".app");
+
+    function setMobilePanel(open) {
+      appRoot.classList.toggle("panel-open", open);
+      mobilePanelToggle.setAttribute("aria-expanded", String(open));
+    }
+
+    mobilePanelToggle.addEventListener("click", () => {
+      setMobilePanel(!appRoot.classList.contains("panel-open"));
+    });
+
+    document.querySelector(".stage").addEventListener("pointerdown", () => {
+      if (window.matchMedia("(max-width: 760px)").matches &&
+          appRoot.classList.contains("panel-open")) {
+        setMobilePanel(false);
+      }
+    });
+
+  </script>
+</body>
+</html>
